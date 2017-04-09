@@ -12,28 +12,30 @@ import tweepy
 import twitter_info 
 import sqlite3
 
-
-
 # Write your test cases here.
 class Tests(unittest.TestCase):
     def test_1(self):
-        self.assertEqual(type(cached_data), type ({}))
+        self.assertEqual(type(CACHED_DICTION), type({}))
     def test_2(self):
-        self.assertEqual(len(b["user"])>0, True)
+        b=Titanic.rating_info()
+        self.assertEqual(len(b)>0, True)
     def test_3(self):
-        
+        self.assertEqual(most_common_title("Split", "Avatar", "Totanic", "Titanic", "Titanic"),("Titanic"))
     def test4(self):
-        self.assertEqual(type(rating_info), type([]))
+        w=Titanic.rating_info()
+        self.assertEqual(type(w[0]),type(""))
     def test5(self):
-        self.assertEqual(len("date_pair")> 1, True)
+        y=Titanic.__str__()
+        self.assertEqual(len(y)> 0, True)
     def test6(self):
-        self.assertEqual(type(s["comments"]["data"]), type([])
+        z=Titanic.__str__()
+        self.assertEqual(type(z), type(""))
     def test7(self):
-    	self.assertEqual(
+        x= Movies("Titanic", "James Cameron")
+    	self.assertEqual(x.name, "Titanic")
     def test8(self):
-    	self.assertEqual()
-
-
+        f= Movies("Titanic", "James Cameron")
+    	self.assertEqual(f.director, "James Cameron")
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
