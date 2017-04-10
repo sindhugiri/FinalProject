@@ -14,28 +14,29 @@ import sqlite3
 
 # Write your test cases here.
 class Tests(unittest.TestCase):
-    def test_1(self):
-        self.assertEqual(type(CACHED_DICTION), type({}))
-    def test_2(self):
-        b=Titanic.rating_info()
-        self.assertEqual(len(b)>0, True)
-    def test_3(self):
-        self.assertEqual(most_common_title("Split", "Avatar", "Totanic", "Titanic", "Titanic"),("Titanic"))
+    def test1(self):
+        cache=open("finalproject.json", "r").read()
+        self.assertEqual(type(cache), type({})) #Checking to see that the CACHE_DICTION is an empty dictionary 
+    def test2(self):
+        cache=open("finalproject.json", "r").read()
+        self.assertTrue("Split" in cache) #Checking to see that the movie title I chose is in the cache
+    def test3(self):
+        z=Movie()
+        self.assertEqual(type(z.imbd_rating), type(9)) #Checking to see that the type of the IMBD rating instance is an integer 
     def test4(self):
-        w=Titanic.rating_info()
-        self.assertEqual(type(w[0]),type(""))
+        b=Movie()
+        self.assertEqual(type(b.title), type("")) #Checking to see that the type of the title instance is a string 
     def test5(self):
-        y=Titanic.__str__()
-        self.assertEqual(len(y)> 0, True)
+        self.assertEqual(most_common_title("Split", "Avatar", "Totanic", "Titanic", "Titanic"),("Titanic")) #Checking to see that the most_common_title function returns the most commonly occuring movie title 
     def test6(self):
-        z=Titanic.__str__()
-        self.assertEqual(type(z), type(""))
+        w=Titanic.rating_info()
+        self.assertEqual(type(w[0]),type("")) #Checking to see that the first element of the list is a string 
     def test7(self):
         x= Movies("Titanic", "James Cameron")
-    	self.assertEqual(x.name, "Titanic")
+        self.assertEqual(x.title, "Titanic") #Checking to see that the instance variable returns the title that I have provided 
     def test8(self):
         f= Movies("Titanic", "James Cameron")
-    	self.assertEqual(f.director, "James Cameron")
+        self.assertEqual(f.director, "James Cameron") #Checking to see that the instance variable returns the director that I have provided 
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
