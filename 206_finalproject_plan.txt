@@ -41,7 +41,7 @@ One instance of Movie will represent the rating of the movie.
 
 * What are 3 instance variables this class will have? What will they be called, and what information will they hold? Why are they important?
 
-The instance variables will be called title, director, IMDB rating, actors, and languages. Title will hold a string of the name of the movie, director will hold a string of the name of the director, ratings will hold an string of the rating value on IMBD, actors will hold a list of strings of the actors in the movie, and languages will hold a string of the movie’s language.  This information is important because these instance variables will be used in the methods I define and the queries that I make to the database. 
+The instance variables will be called title, director, ratings, actors, and languages. Title will hold a string of the name of the movie, director will hold a string of the name of the director, ratings will hold an integer of the rating value on IMBD, actors will hold a list of strings of the actors in the movie, and languages will hold a string of the movie’s language.  This information is important because these instance variables will be used in the methods I define and the queries that I make to the database. 
 
 
 * Explain 2 methods the class will have that are not the class constructor (__init__ method) by answering the following questions for each. 
@@ -55,7 +55,7 @@ The name of this method will be rating_info
 The method will provide the all the sources of the rating 
 
 - Will it take any additional input? 
-The rating of the movie according to OMBD
+The rating of the movie according to IMBD
 
 - Will it return anything? Should it change anything about the instance/an instance variable? 
 It will return the ratings in the form of a list with all the sources being elements within the list. It won’t change anything about the instance variables.   

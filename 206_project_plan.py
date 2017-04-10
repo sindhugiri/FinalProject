@@ -22,15 +22,15 @@ class Tests(unittest.TestCase):
         self.assertTrue("Split" in cache) #Checking to see that the movie title I chose is in the cache
     def test3(self):
         z=Movie()
-        self.assertEqual(type(z.imbd_rating), type(9)) #Checking to see that the type of the IMBD rating instance is an integer 
+        self.assertEqual(type(z.ratings), type(9)) #Checking to see that the type of the IMBD rating instance is an integer 
     def test4(self):
         b=Movie()
         self.assertEqual(type(b.title), type("")) #Checking to see that the type of the title instance is a string 
     def test5(self):
         self.assertEqual(most_common_title("Split", "Avatar", "Totanic", "Titanic", "Titanic"),("Titanic")) #Checking to see that the most_common_title function returns the most commonly occuring movie title 
     def test6(self):
-        w=Titanic.rating_info()
-        self.assertEqual(type(w[0]),type("")) #Checking to see that the first element of the list is a string 
+        w=Titanic.__str__()
+        self.assertEqual(type(w),type("")) #Checking to see that the first element of the list is a string 
     def test7(self):
         x= Movies("Titanic", "James Cameron")
         self.assertEqual(x.title, "Titanic") #Checking to see that the instance variable returns the title that I have provided 
