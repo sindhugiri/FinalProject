@@ -17,7 +17,6 @@ import webbrowser
 from pprint import pprint
 import sys
 import codecs
-
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer) 
 
 
@@ -51,28 +50,44 @@ except:
 ##get_user_tweets definition 
 
 def get_tweets(phrase):
-    text_twitter = []
-    twitter_phrase ="twitter_"+str(phrase)
+    twitter_phrase = "twitter_"+str(phrase)
+    tweets = []
 
     if twitter_phrase in CACHE_DICTION:
         response_text = CACHE_DICTION[twitter_phrase]
-        
+
     else:
         api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
         public_tweets = api.search(q=phrase)
-
         CACHE_DICTION[twitter_phrase] = public_tweets
         response_text = public_tweets
-
 
         cache_file = open(CACHE_FNAME, 'w')
         cache_file.write(json.dumps(CACHE_DICTION))
         cache_file.close()
-    
-    y= response_text["statuses"]
-    for x in y:
-        text_twitter.append(x)
-    return text_twitter
+
+
+    tweeter = response_text["statuses"]
+    for tweet in tweeter:
+        tweets.append(tweet)
+    return tweets
+
+class Tweet(object):
+
+    def __init__(self, tweet_list, movie_titles):
+        self.search=[]
+        for tweet in tweet_list:
+            for movie in movie_titles:
+                if movie in tweet["text"]:
+                    self.search.append(movie)
+            self.text= tweet["text"]
+            self.tweet_id = tweet["id"]
+            self.user_id= tweet["user"]["screen_name"]
+            self.retweets = tweet["retweet_count"]
+
+    def tweet_list(self):
+        f = (self.text, self.tweet_id, self.user_id, self.retweets)
+        return f
 
 ## get_user_tweets definition 
 
@@ -96,11 +111,23 @@ def get_user_tweets(phrase):
 
     for tweet in response:
             text_twitter.append(tweet)
-        
+    
     return text_twitter
 
-
-umich_tweets= get_user_tweets("umich")
+class User(object):
+    def __init__(self,user, tweet_list):
+        self.search=[]
+        for tweet in tweet_list:
+            for user in user_list:
+                if user["id"] in tweet[["entities"]["user_mentions"]:
+                    self.search.append(user["id"])
+            self.user_id=user["id"]
+            self.screen_name=user["screen_name"]
+            self.num_favs=user["favourites_count"]
+        
+    def user_stuff(self):
+        m = (self.user_id, self.screen_name, self.num_favs)
+        return m
 
 ##get_movie_info definition 
 
@@ -125,63 +152,38 @@ def get_OMBDinfo(phrase):
 
 class Movie(object):
     def __init__(self, movie_diction):
+
         self.id = movie_diction["imdbID"]
-        self.title = movie_diction["Title"]
+        self.title = movie_diction["Title"]  
         self.director = movie_diction["Director"]
-        self.rating = movie_diction["imdbRating"]
-        self.actors = movie_diction["Actors"] 
-        self.languages = movie_diction["Language"] 
+        self.imdb_rating = movie_diction["imdbRating"]
+        self.actors = movie_diction["Actors"]
+        self.languages = movie_diction["Language"]
 
     def lst_actors(self):
         return self.actors.split(",")
     def num_languages(self):
         return len(self.languages.split(","))
-    def num_one_actor(self):
+    def billed_actor(self):
         return self.lst_actors()[0]
 
-    def tuple_generate(self): ##Remember the order used here, make sure it's correct with what the database table row order is
-        tup = (self.id, self.title, self.director, self.rating, self.num_one_actor(), self.num_languages())
-        return tup
+    def omdb_stuff(self):
+        r = (self.id, self.title, self.director, self.languages, self.imdb_rating, self.actors)
+        return r
 
-class Tweet(object):
+tweet_list = [get_tweets(movie) for movie in movie_titles]
 
-    def __init__(self, tweet_list, movie_titles):
-        self.search = []
-        self.text = []
-        self.id = []
-        self.user = []
-        self.favorites = []
-        self.retweets = []
-        for tweet in tweet_list:
-            for movie in movie_titles:
-                if movie in tweet["text"]:
-                    self.search.append(movie)
-            self.text.append(tweet["text"])
-            self.id.append(tweet["id"])
-            self.user.append(tweet["user"]["screen_name"])
-            self.favorites.append(tweet["favorite_count"])
-            self.retweets.append(tweet["retweet_count"])
+tweet_instances=[Tweet(tweet_list=diction, movie_titles = movie_titles) for diction in tweet_list]
 
-    def zip_lists(self):
-        m = zip(self.search, self.text, self.id, self.user, self.favorites, self.retweets)
-        w = list(m)
-        return w
+movie_list = [get_OMBDinfo(item) for item in movie_titles]
 
-tweet_list = []
-for movie in movie_titles:
-    tweet_list.append(get_tweets(movie))
+movie_instances = [Movie(diction) for diction in movie_list]
 
-tweet_instances=[]
-for diction in tweet_list:
-    tweet_instances.append(Tweet(tweet_list=diction, movie_titles = movie_titles))
+user_list=[get_user_tweets(user) for user in movie_titles]
 
-movie_list = []
-for item in movie_titles:
-    movie_list.append(get_OMBDinfo(item))
+user_instances=[User(user=diction, tweet_list=tweet_list) for diction in user_list]
 
-movie_instances = []
-for diction in movie_list:
-    movie_instances.append(Movie(diction))
+
 
 ## Task 2 - Creating database and loading data into database
 
@@ -191,7 +193,7 @@ cur = conn.cursor()
 ## Creating Tweets database 
 cur.execute('DROP TABLE IF EXISTS Tweets')
 
-table_spec1 = "CREATE TABLE IF NOT EXISTS Tweets(text TEXT PRIMARY KEY, tweet_id INTEGER, user_id TEXT, time_posted TIMESTAMP, retweets INTEGER)"
+table_spec1 = "CREATE TABLE IF NOT EXISTS Tweets(text TEXT PRIMARY KEY, tweet_id INTEGER, user_id TEXT, retweets INTEGER)"
 
 cur.execute(table_spec1)
 
@@ -205,58 +207,111 @@ cur.execute(table_spec2)
 ## Creating Movies database 
 cur.execute("DROP TABLE IF EXISTS Movies")
 
-table_spec1 = "CREATE TABLE IF NOT EXISTS Movies (movie_ID TEXT PRIMARY KEY, title TEXT, director TEXT, IMDB_rating TEXT, top_actor TEXT, num_of_languages INTEGER)"
+table_spec1 = "CREATE TABLE IF NOT EXISTS Movies (id TEXT PRIMARY KEY, title TEXT, director TEXT, imdb_rating TEXT, billed_actor TEXT, num_languages INTEGER)"
 
 cur.execute(table_spec1)
 
 
 ## Loading Tweets database 
-statement1 = 'INSERT or IGNORE INTO Tweets VALUES (?, ?, ?, ?, ?)'
+statement1 = 'INSERT or IGNORE INTO Tweets VALUES (?, ?, ?, ?)'
 
-for x in umich_tweets:
+for x in tweet_instances:
 
-    text=x["text"]
-    tweet_id=x["id_str"]
-    user_id=x["user"]["screen_name"]
-    time_posted=x["created_at"]
-    retweets=x["retweet_count"]
-
-    total_tweet=(tweet_id, text, user_id, time_posted, retweets)
-
-    cur.execute(statement1,total_tweet)
-
-
+    cur.execute(statement1,x.tweet_list())
 
 ## Loading Users database 
 statement2 = "INSERT or IGNORE INTO Users VALUES(?,?,?)"
 
-user_ids = []
-for tweet in umich_tweets:
-    for user in tweet["entities"]["user_mentions"]:
-        user_ids.append(user["screen_name"])
+for w in user_instances:
 
-user_ids.insert(0, '@umich')
-
-for user in user_ids:
-    api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
-    user = api.get_user(user)
-    user_id = user["id"]
-    screen_name=user["screen_name"]
-    num_favs= user["favourites_count"]
-
-    total_tweet=(user_id, screen_name, num_favs)
-
-    cur.execute(statement2,total_tweet)
-
+    cur.execute(statement2, w.user_stuff())
 
 ##Loading Movies database 
 
-mov_statement = "INSERT INTO Movies VALUES (?, ?, ?, ?, ?, ?)"
+statement3 = "INSERT INTO Movies VALUES (?, ?, ?, ?, ?, ?)"
 
-for inst in movie_instances:
-    cur.execute(mov_statement, inst.tuple_generate())
+for w in movie_instances:
+    
+    cur.execute(statement3, w.omdb_stuff())
 
 conn.commit()
+conn.close()
+
+
+##Making Queries to the databases 
+
+# two="SELECT *FROM Tweets WHERE retweets>5"
+# cur.execute(two)
+# more_than_25_rts=cur.fetchall()
+
+# f="SELECT text FROM Tweets INNER JOIN Movie where IMDB_rating >5"
+# g=cur.execute(f)
+# joined_result= g.fetchall()
+#best_movies= [list(x) for x in joined_result]
+#best_movies=str(best_movies[0][0])
+
+# w=SELECT *FROM Users WHERE num_favs>5"
+# cur.execute (w)
+#more_than_5_num_favs=cur.fetchall()
+#
+# y="SELECT screen_name FROM Users INNER JOIN Movie where IMDB_rating >5"
+# r= cur.execute(y)
+# screen_names= [x[0] for x in r.fetchall()]
+
+# f="SELECT *FROM Movies WHERE imdb_rating >5"
+# g=cur.execute(f)
+# joined_result1= g.fetchall()
+
+# f="SELECT director FROM Movies WHERE imdb_rating >5"
+# g=cur.execute(f)
+# joined_result2= g.fetchall()
+
+#r = map (joined_result2,joined_result1)
+
+##Manipulating data with comprehension and libraries 
+# p=[]
+# for x in descriptions_fav_users:
+#     p.append(x.split())
+
+# u=[]
+# for y in p:
+#     for r in y:
+#         u.append(r)
+
+# description_words = set(x for x in u)
+
+# ##Use a Counter in the collections library 
+# p=[]
+# for x in descriptions_fav_users:
+#     p.append(x.split())
+
+# u=[]
+# for y in p:
+#     for r in y:
+#         for s in r:
+#             u.append(s)
+
+# most_common= collections.Counter(u).most_common(1)
+
+# most_common_char = most_common[0][0]
+
+
+##I also want to rework my instance variables in my classes to reflect my original plans 
+##While continuing with this project, I still write specific queries to develop connections between the three tables
+##I also plan on using data manioulation techniques such as list comphrehensions/Counters in the collections library 
+##I want to list out the statistics of the data collected in a text file and then use a csv file to make a data visualization 
+
+# import csv
+# outfile = open("twittervsOMDB.csv", "w")
+# outfile.write("Name, CreatedTime, IDNumber\n")
+# for item in post_insts:
+#     outfile.write('{}, {}, {}\n'.format(item.getname(), item.getcreated_time(), item.getid()))
+# outfile.close()
+
+f = open('summarystats.txt', 'w')
+f.write(json.dumps(CACHE_DICTION))
+f.close()
+
 
 # Write your test cases here.
 class Tests(unittest.TestCase):
