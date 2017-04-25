@@ -18,6 +18,7 @@ import webbrowser
 from pprint import pprint
 import sys
 import codecs
+
 sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer) 
 
 
@@ -31,7 +32,7 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 
 # Set up library to grab stuff from twitter with your authentication, and return it in a JSON format 
-movie_titles = ["Split", "The Room","Finding Dory", "Forrest Gump", "Her"]
+movie_titles = ["Split", "The Room","Finding Dory", "Moonlight", "Her"]
 
 ##### END TWEEPY SETUP CODE
 
@@ -272,71 +273,111 @@ num_lang_imdb= g.fetchall()
 ##Manipulating data with comprehension and libraries 
 
 #Use a Counter in the collections library 
+
+#Pulling out the most common retweets numbers and the amount of times they occur 
+
 u=[]
 for y in retweets:
     for x in y:
         u.append(x)
-most_common1= collections.Counter(u).most_common(1)
+most_common1= collections.Counter(u).most_common(5)
 # h= {j:k for (j,k) in most_common1}
+#print (most_common1)
 
+#Pulling out the most common retweets numbers of movies that have an imdb rating greater than 5 and the amount of times they occur 
 
 w=[]
 for y in tweets_imdb:
     for x in y:
         w.append(x)
-most_common2= collections.Counter(w).most_common(1)
+most_common2= collections.Counter(w).most_common(5)
 # l={x:y for (x,y) in most_common2}
+#print (most_common2)
 
+#Pulling the most common favorites count for user and the amount of times they occur 
 
 r=[]
 for y in num_favs:
     for s in y:
         r.append(s)
-most_common3= collections.Counter(r).most_common(1)
+most_common3= collections.Counter(r).most_common(5)
 # o={y:u for (y,u) in most_common3}
+#print (most_common3)
 
+#Pulling the most common favorites count for users of movies that have an imdb rating greater than 5 and the amount of times they occur 
 
 d=[]
 for y in num_favs_imdb:
     d.append(y)
-most_common4= collections.Counter(d).most_common(1)
+most_common4= collections.Counter(d).most_common(5)
 # o={i:p for (i,p) in most_common4}
 
+
+#Most common retweets--key values 
+#Most common retweets with imdb rating of greater than 5--value pair 
 
 e=[x[0] for x in most_common1]
 g=[x[0] for x in most_common2]
 t=zip(e,g)
 retweets_vs_imdb={e:g for e,g in t}
+#print (retweets_vs_imdb)
+
+#Most common retweets amount--key values 
+#Most common retweets amount with imdb rating of greater than 5--value pair 
 
 j=[x[1] for x in most_common1]
 a=[x[1] for x in most_common2]
 d=zip(j,a)
 retweetsamount_vs_imdb={j:a for j,a in d}
+#retweetsamount_vs_imdb=list(retweetsamount_vs_imdb)
+print (retweetsamount_vs_imdb)
+
+#Most common numfavs--key values 
+#Most common numfavs with imdb rating of greater than 5--value pair 
 
 m=[x[0] for x in most_common3]
 n=[x[0] for x in most_common4]
 q=zip(m,n)
 num_favs_vs_imdb={e:g for e,g in q}
 
+#Most common numfavs amount--key values 
+#Most common numfavs amount with imdb rating of greater than 5--value pair 
+
 b=[x[1] for x in most_common3]
 v=[x[1] for x in most_common4]
 z=zip(b,v)
 num_favs_amount_vs_imdb={b:v for b,v in z}
 
+def difference_retweets():
+    for j,a in retweetsamount_vs_imdb.items():
+        if a> j:
+            i=a-j
+            return i
 
-# x=[("SELECT text FROM Tweets INNER JOIN Users WHERE screen_name='" + name + "'") for name in screen_names]
-# for y in x:
-#     cur.execute(y)
-#     tweet=cur.fetchall()
-#     tweet_text=[w[0] for w in tweet]
-#     name=screen_names[x.index(y)]
-#     new_dict={name: tweet_text}
-#     twitter_info_diction.update(new_dict)
 
-# retweets_imdb={}
-# stuff=zip(most_common1, most_common2)
-# retweets_imdb=dict(stuff)
-# # print (retweets_imdb)
+w=map(difference_retweets(), retweetsamount_vs_imdb)
+print (w)      
+
+
+def difference_num_favs():
+    for b,v in num_favs_amount_vs_imdb.items():
+        if v> b:
+            er=v-b
+            return er
+
+u=map(difference_num_favs(), num_favs_amount_vs_imdb)
+
+
+
+# wo=[]
+# rating_influence_num_favs=[]
+# for b,v in num_favs_amount_vs_imdb.items():
+#     if v>b:
+#         wo.append(v-j)
+# for s in wo:         
+#     rating_influence_num_favs.append(s)
+
+
 
 
 
